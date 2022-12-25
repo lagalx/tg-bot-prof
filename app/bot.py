@@ -5,11 +5,12 @@ from telebot import types
 
 from app import strings
 from app.config import Commands, Paths, TGBot
+from app.constants import MAX_MEDIA_GROUP_LEN
+from app.tg_utils import media_docs_from_files
 from app.types import User
+from app.utils import partition
 
 bot = telebot.TeleBot(TGBot.TOKEN, parse_mode=None)
-
-DOCUMENT_SEND_FLAG = "rb"
 
 
 @bot.message_handler(commands=[Commands.START])
@@ -62,16 +63,12 @@ def send_docs(message: types.Message):
         bot.register_next_step_handler(message, send_docs)
         return
     direction_path = os.path.join(Paths.DIRECTIONS_PATH, direction)
-    documents = tuple(
-        open(os.path.join(direction_path, f), DOCUMENT_SEND_FLAG)
-        for f in os.listdir(direction_path)
-        if os.path.isfile(os.path.join(direction_path, f))
-    )
+    documents = media_docs_from_files(direction_path)
 
     bot.send_message(
         message.chat.id,
         strings.SEND_DOCS_CAPTION,
         reply_markup=types.ReplyKeyboardRemove(),
     )
-    for doc in documents:
-        bot.send_document(message.chat.id, document=doc)
+    for docs_part in partition(documents, MAX_MEDIA_GROUP_LEN):
+        bot.send_media_group(message.chat.id, media=docs_part)
