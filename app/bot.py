@@ -51,6 +51,10 @@ def send_docs(message: types.Message):
         if os.path.isfile(os.path.join(direction_path, f))
     )
 
-    bot.send_message(message.chat.id, strings.SEND_DOCS_CAPTION)
+    bot.send_message(
+        message.chat.id,
+        strings.SEND_DOCS_CAPTION,
+        reply_markup=types.ReplyKeyboardRemove(),
+    )
     for doc in documents:
         bot.send_document(message.chat.id, document=doc)
