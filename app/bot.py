@@ -39,11 +39,16 @@ def choose_direction(message: types.Message):
 
 def send_docs(message: types.Message):
     choosen_direction = message.text
-    direction = [
-        direction
-        for direction in os.listdir(Paths.DIRECTIONS_PATH)
-        if direction.lower() == choosen_direction.lower()
-    ][0]
+    try:
+        direction = [
+            direction
+            for direction in os.listdir(Paths.DIRECTIONS_PATH)
+            if direction.lower() == choosen_direction.lower()
+        ][0]
+    except:
+        bot.send_message(message.chat.id, strings.ERROR_FIND_DIRECTION)
+        bot.register_next_step_handler(message, send_docs)
+        return
     direction_path = os.path.join(Paths.DIRECTIONS_PATH, direction)
     documents = tuple(
         open(os.path.join(direction_path, f), DOCUMENT_SEND_FLAG)
