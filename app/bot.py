@@ -21,7 +21,13 @@ def start(message: types.Message):
 
 
 def request_user_name(message: types.Message):
-    last_name, first_name, middle_name = message.text.split()
+    fio = message.text.split()
+    if len(fio) != 3:
+        bot.send_message(message.chat.id, strings.ERROR_FIO_NOT_FULL)
+        bot.register_next_step_handler(message, request_user_name)
+        return
+
+    last_name, first_name, middle_name = fio
     user = User(
         last_name=last_name,
         first_name=first_name,
